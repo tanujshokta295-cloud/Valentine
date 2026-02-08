@@ -381,21 +381,38 @@
     <script>
         // Parse URL data
         const urlParams = new URLSearchParams(window.location.search);
-        const encodedData = urlParams.get('data');
+        const shareId = urlParams.get('id');
+        
+        let data = null;
 
-        if (!encodedData) {
+        if (shareId) {
+            // Try to load from localStorage using share ID
+            const storedData = localStorage.getItem('valentine_' + shareId);
+            if (storedData) {
+                data = JSON.parse(storedData);
+            } else {
+                // Fallback: load latest from localStorage
+                const latestData = localStorage.getItem('valentineData');
+                if (latestData) {
+                    data = JSON.parse(latestData);
+                }
+            }
+        } else {
+            // No ID provided, load latest
+            const latestData = localStorage.getItem('valentineData');
+            if (latestData) {
+                data = JSON.parse(latestData);
+            }
+        }
+
+        if (!data) {
+            alert('No Valentine data found. Please create a Valentine card first!');
             window.location.href = 'index.html';
         } else {
-            try {
-                const data = JSON.parse(decodeURIComponent(atob(encodedData)));
-                document.getElementById('nickname').textContent = `To ${data.nickname}`;
-                document.getElementById('story').textContent = data.story;
-                document.getElementById('photo1').src = data.photo1;
-                document.getElementById('photo2').src = data.photo2;
-            } catch (error) {
-                console.error('Error parsing data:', error);
-                window.location.href = 'index.html';
-            }
+            document.getElementById('nickname').textContent = `To ${data.nickname}`;
+            document.getElementById('story').textContent = data.story;
+            document.getElementById('photo1').src = data.photo1;
+            document.getElementById('photo2').src = data.photo2;
         }
 
         // Create floating hearts
@@ -489,6 +506,15 @@
         // Share button
         document.getElementById('shareBtn').addEventListener('click', function() {
             const url = window.location.href;
+            
+            // Check if we have a share ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const shareId = urlParams.get('id');
+            
+            if (!shareId) {
+                alert('Please create a new Valentine card to get a shareable link!');
+                return;
+            }
             
             if (navigator.share) {
                 navigator.share({
