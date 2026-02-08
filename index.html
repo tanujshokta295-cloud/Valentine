@@ -402,8 +402,14 @@
                 photo2: photo2Data
             };
 
-            const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-            window.location.href = `valentine.html?data=${encoded}`;
+            // Use localStorage instead of URL (no size limit issues)
+            localStorage.setItem('valentineData', JSON.stringify(data));
+            
+            // Generate shareable ID for URL
+            const shareId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+            localStorage.setItem('valentine_' + shareId, JSON.stringify(data));
+            
+            window.location.href = `valentine.html?id=${shareId}`;
         });
     </script>
 </body>
